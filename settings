@@ -1,0 +1,7 @@
+
+tmanual = False
+target_speed = 128000
+tpreambulecheck = False
+tcs = False
+tpreambuleval = 55AA
+tcycles = 100000
