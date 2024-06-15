@@ -1,6 +1,15 @@
 import os, sys
-import getpass, grp
+import getpass, platform
 from configparser import ConfigParser
+from logging import getLogger
+
+# available in linux only
+try:
+    import grp
+except Exception:
+    pass
+
+log = getLogger(__name__)
 
 
 class TestName:
@@ -11,9 +20,9 @@ class TestName:
         for each in os.getgroups():
             self.user_groups.append(grp.getgrgid(each).gr_name)
         if 'dialout' in self.user_groups:
-            return print('yes')
+            log.debug('User have permissions')
         else:
-            return print('no')
+            log.error('User have\'nt permissions')
 
 class SettingsClass:
     def __init__(self):
@@ -22,35 +31,53 @@ class SettingsClass:
             self.base_path = sys._MEIPASS
         except Exception:
             self.base_path = os.path.abspath('.')
-        self.settings_path = os.path.join(self.base_path, 'settings')
+        self.settings_path = os.path.join(self.base_path, 'settings.ini')
         if (os.path.isfile(self.settings_path)):
             try:
                 self.config.read(self.settings_path)
-                print('readed')
                 if 'default' in self.config.sections():
-                    print('default')
+                    log.info('Settings loaded')
                     pass
                 else:
-                    print("not default")
-                    self.write_settings()
+                    log.warning('Restoring default settings')
+                    self.restore_default_settings()
             except:
-                print('no sections')
-                self.write_settings()
-            # print(self.config.sections())
-            # if 'default' in self.config:
-            #     print('default')
-            # else:
-            #     print('no section')
+                log.info('Creating settings file')
+                self.restore_default_settings()
+                log.info('Created settings file')
         else:
-            self.write_settings()
-    def write_settings(self):
-        print('write settings')
+            self.restore_default_settings()
+    def restore_default_settings(self):
+        while True:
+            try:
+                self.default_settings = [['available_speeds', '9600,14400,19200,38400,56000,57600,115200,128000,256000'],\
+                                         ['target_speed', '115200'], ['tpreambuleval', '55AA'], ['tpreambulecheck', 'False'],\
+                                         ['tcycles', '1'], ['tmanual', 'False'], ['tcs', 'False']]
+                self.config.add_section('default')
+                for each in self.default_settings:
+                    self.config['default'][each[0]] = each[1]
+                with open(self.settings_path, 'w') as configfile:
+                    self.config.write(configfile)
+                log.info('Default settings restored')
+                break
+            except Exception:
+                for each in self.config.sections():
+                    self.config.remove_section(each)
+                log.warning('Custom settings was deleted')
+
+    def write_settings(self, section, parameter, value, type):
+        self.config[section][parameter] = value
+        with open(self.settings_path, type) as configfile:
+            self.config.write(configfile)
 
 
 
 if __name__ == '__main__':
     test = TestName()
-    test.permissions()
+    if platform.system() == 'Windows':
+        pass
+    else:
+        test.permissions()
     settings = SettingsClass()
 else:
     pass
