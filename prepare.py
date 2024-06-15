@@ -6,7 +6,7 @@ from logging import getLogger
 # available in linux only
 try:
     import grp
-except Exception:
+except ModuleNotFoundError:
     pass
 
 log = getLogger(__name__)
@@ -31,6 +31,9 @@ class SettingsClass:
             self.base_path = sys._MEIPASS
         except Exception:
             self.base_path = os.path.abspath('.')
+        self.load_settings(self.base_path)
+
+    def load_settings(self, base_path):
         self.settings_path = os.path.join(self.base_path, 'settings.ini')
         if (os.path.isfile(self.settings_path)):
             try:
@@ -65,9 +68,9 @@ class SettingsClass:
                     self.config.remove_section(each)
                 log.warning('Custom settings was deleted')
 
-    def write_settings(self, section, parameter, value, type):
+    def write_settings(self, section, parameter, value):
         self.config[section][parameter] = value
-        with open(self.settings_path, type) as configfile:
+        with open(self.settings_path, 'w') as configfile:
             self.config.write(configfile)
 
 
