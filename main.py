@@ -23,7 +23,7 @@ if __name__ == '__main__':
         test.permissions()
     settings = SettingsClass()
     read_from_file = PackagePrepare()
-    read_from_file.read_file(settings.base_path)
+    read_from_file.assembling_from_f(settings.base_path, 'AA')
     log.info('Program ended')
 else:
     pass
