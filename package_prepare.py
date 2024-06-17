@@ -1,23 +1,28 @@
 import binascii
-import os, sys
-from configparser import ConfigParser
+import os
 from logging import getLogger
 
 log = getLogger(__name__)
 
+
 class PackagePrepare:
+
     def assembling_from_f(self, base_path, preambule):
         self.convert2bytes = []
-        self.raw_file = self.read_file(base_path)
-        self.raw_w_preambule = [preambule + self.each for self.each in self.raw_file]
-        log.debug(f'Packet from file with preambule: {self.raw_w_preambule}')
-        [self.convert2bytes.append(binascii.unhexlify(self.each)) for self.each in self.raw_w_preambule]
-        log.debug('Start calculating checksum')
-        return self.calc_cs_mod8(self.convert2bytes)
+        self.commands_path = os.path.join(base_path, 'commands.txt')
+        if os.path.isfile(self.commands_path):
+            self.raw_file = self.read_file(self.commands_path)
+            self.raw_w_preambule = [preambule + self.each for self.each in self.raw_file]
+            log.debug(f'Packet from file with preambule: {self.raw_w_preambule}')
+            [self.convert2bytes.append(binascii.unhexlify(self.each)) for self.each in self.raw_w_preambule]
+            log.debug('Start calculating checksum')
+            return self.calc_cs_mod8(self.convert2bytes)
+        else:
+            log.error('File with commands does not exist or no read permissions.')
 
-    def read_file(self, base_path):
-        # self.test_list = []
-        with open((os.path.join(base_path, 'commands.txt')), 'r') as file:
+
+    def read_file(self, commands_path):
+        with open(self.commands_path, 'r') as file:
             self.raw = [line.rstrip().replace(' ', '') for line in file]
             log.debug(f'Read from file: {self.raw}')
             if self.input_file_control(self.raw):

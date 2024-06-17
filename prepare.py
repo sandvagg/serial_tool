@@ -12,10 +12,11 @@ except ModuleNotFoundError:
 log = getLogger(__name__)
 
 
-class TestName:
+class CheckPermissonsClass:
     def __init__(self):
         pass
-    def permissions(self):
+
+    def check_permissions(self):
         self.user_groups = []
         for each in os.getgroups():
             self.user_groups.append(grp.getgrgid(each).gr_name)
@@ -50,6 +51,7 @@ class SettingsClass:
                 log.info('Created settings file')
         else:
             self.restore_default_settings()
+
     def restore_default_settings(self):
         while True:
             try:
@@ -76,11 +78,13 @@ class SettingsClass:
 
 
 if __name__ == '__main__':
-    test = TestName()
+    lin_permissions = CheckPermissonsClass()
     if platform.system() == 'Windows':
+        log.debug('Windows detected')
         pass
     else:
-        test.permissions()
+        log.debug('Linux detected')
+        lin_permissions.check_permissions()
     settings = SettingsClass()
 else:
     pass
