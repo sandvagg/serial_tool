@@ -75,6 +75,30 @@ class SettingsClass:
         with open(self.settings_path, 'w') as configfile:
             self.config.write(configfile)
 
+    def read_parameter(self, section, parameter):
+        if self.config.has_option(section,parameter):
+            return self.config.get(section,parameter)
+        else:
+            return self.config.get('default',parameter)
+
+    def read_parameters(self, section):
+        self.parameters = self.config.items(section)
+        self.parameters_names = [each[0] for each in self.parameters]
+        self.parameters_values = [each[1] for each in self.parameters]
+        # log.debug(f'{self.parameters_names}\n {self.parameters_values}')
+        return self.parameters_names, self.parameters_values
+
+    def test(self):
+        return self.read_parameters('default')
+
+    def check_custom_settings(self, parameter):
+        self.read_parameters('default')
+        if 'custom' in self.config.sections():
+            return self.read_parameter('custom', parameter)
+        else:
+            return False
+
+
 
 
 if __name__ == '__main__':
